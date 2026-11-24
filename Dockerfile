@@ -1,13 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Minimal image for a machineplay UCI engine.
-#
-#   docker build -t my-engine .
-#   docker run --rm -i my-engine     # then type UCI commands (uci, position, go)
-#
-# machineplay runs the image as `docker run --rm -i --network none ... my-engine`
-# and pipes the UCI protocol over stdin/stdout, so the container just needs to
-# launch the engine and talk over stdio.
+# machineplay runs this as `docker run --rm -i --network none …` and speaks UCI
+# over stdin/stdout.
 
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
@@ -16,13 +10,11 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install dependencies first so this layer is cached until the lockfile changes.
+# Dependencies first, so this layer stays cached until the lockfile changes.
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
-# Then add the engine source.
 COPY main.py ./
 
-# Run the engine straight from the synced virtualenv. No uv at runtime keeps
-# startup fast and works under `--network none`.
+# Not `uv run`: it is slower to start and may want the network.
 ENTRYPOINT [".venv/bin/python", "main.py"]

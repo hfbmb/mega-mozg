@@ -47,7 +47,10 @@ All of the chess "thinking" lives in one function in `main.py`:
 
 ```python
 def choose_move(board: chess.Board) -> chess.Move:
-    return next(iter(board.legal_moves))
+    for move in board.legal_moves:
+        return move  # Just return first move
+
+    raise ValueError("Only called on boards with at least one legal move")
 ```
 
 `board` is a [`chess.Board`](https://python-chess.readthedocs.io/en/latest/core.html#board).
