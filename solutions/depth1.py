@@ -3,6 +3,15 @@ import sys
 
 import chess
 
+PIECE_TYPE_COST = {
+    chess.KING: 0,  # both kings are always on the board, so they always cancel out
+    chess.QUEEN: 900,
+    chess.ROOK: 500,
+    chess.BISHOP: 300,
+    chess.KNIGHT: 300,
+    chess.PAWN: 100,
+}
+
 
 def uci() -> None:
     board = chess.Board()
@@ -33,35 +42,40 @@ def uci() -> None:
 
 
 def choose_move(board: chess.Board) -> chess.Move:
-    white_to_play = board.turn == chess.WHITE
-
     best_move = None
-    best_score = -math.inf if white_to_play else math.inf
 
-    for move in board.legal_moves:
-        board.push(move)
-        score = evaluate(board)
-        board.pop()
+    # White wants the score as high as possible, black as low as possible. Two
+    # branches now; the negamax chapter folds them into one.
+    if board.turn == chess.WHITE:
+        best_score = -math.inf
+        for move in board.legal_moves:
+            board.push(move)
+            score = evaluate(board)
+            board.pop()
 
-        # White wants the score as high as possible, black as low as possible.
-        if (score > best_score) if white_to_play else (score < best_score):
-            best_score = score
-            best_move = move
+            if score > best_score:
+                best_score = score
+                best_move = move
+    else:
+        best_score = math.inf
+        for move in board.legal_moves:
+            board.push(move)
+            score = evaluate(board)
+            board.pop()
+
+            if score < best_score:
+                best_score = score
+                best_move = move
 
     if best_move is None:
         raise ValueError("choose_move is called on board without legal moves")
 
+    # UCI wants the score in centipawns from the point of view of the side to
+    # move; `evaluate` always speaks white.
+    side = 1 if board.turn == chess.WHITE else -1
+    print(f"info score cp {side * best_score} pv {best_move.uci()}")
+
     return best_move
-
-
-COST_BY_PIECE_TYPE = {
-    chess.KING: 0,  # both kings are always on the board, so they always cancel out
-    chess.QUEEN: 9,
-    chess.ROOK: 5,
-    chess.BISHOP: 3,
-    chess.KNIGHT: 3,
-    chess.PAWN: 1,
-}
 
 
 def evaluate(board: chess.Board) -> int:
@@ -75,9 +89,9 @@ def evaluate(board: chess.Board) -> int:
     for square in chess.SQUARES:
         if piece := board.piece_at(square):
             if piece.color == chess.WHITE:
-                white_score += COST_BY_PIECE_TYPE[piece.piece_type]
+                white_score += PIECE_TYPE_COST[piece.piece_type]
             else:
-                black_score += COST_BY_PIECE_TYPE[piece.piece_type]
+                black_score += PIECE_TYPE_COST[piece.piece_type]
 
     return white_score - black_score
 

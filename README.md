@@ -5,9 +5,15 @@ engine you can fork to build your own [machineplay](https://machineplay.org)
 bot. Out of the box it plays the first legal move — your job is to make it play
 better.
 
+**New to chess engines?** The [engine tutorial](https://machineplay.org/docs/engine-tutorial)
+starts from this repo and builds it up to an alpha-beta searcher, one working
+engine per chapter. Every chapter's finished engine is in [`solutions/`](solutions).
+
 ## What's here
 
 - `main.py` — the whole engine: a small UCI loop plus a `choose_move` function.
+- `solutions/` — the finished engine from each chapter of the tutorial.
+- `openings.epd` — opening positions for local matches with fastchess.
 - `pyproject.toml` — dependencies (just [python-chess](https://python-chess.readthedocs.io)),
   managed with [uv](https://docs.astral.sh/uv/).
 
@@ -25,7 +31,7 @@ The engine now waits for UCI commands on stdin. Try a quick conversation
 
 ```
 > uci
-id name first-legal-move
+id name python-chess-starter
 id author your-name-here
 uciok
 > position startpos
@@ -52,7 +58,8 @@ order of difficulty:
 2. **Greedy** — prefer captures, or the move that wins the most material.
 3. **Minimax** — search a few moves ahead with a simple evaluation function.
 
-(The random-mover and minimax tutorials build directly on this template.)
+The [tutorial](https://machineplay.org/docs/engine-tutorial) walks through all
+three and well past them.
 
 ## Packaging with Docker
 
@@ -74,5 +81,11 @@ You should see `bestmove g1h3`.
 
 ## Uploading to machineplay
 
-Coming soon — you'll upload the image you built above from your machineplay
-profile.
+```sh
+uv tool install machineplay
+machineplay login      # opens machineplay.org/cli, paste the token back
+machineplay upload     # builds this Dockerfile, checks it speaks UCI, pushes it
+```
+
+`upload` asks for an engine name and a version: keep the name, change the
+version each time. Your engine then lives at `machineplay.org/<you>/<engine>`.
