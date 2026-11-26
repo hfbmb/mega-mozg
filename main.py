@@ -1,5 +1,7 @@
 import sys
 
+import random
+
 import chess
 
 
@@ -32,10 +34,7 @@ def uci() -> None:
 
 
 def choose_move(board: chess.Board) -> chess.Move:
-    for move in board.legal_moves:
-        return move  # Just return first move
-
-    raise ValueError("Only called on boards with at least one legal move")
+    return random.choice([move for move in board.legal_moves])
 
 
 def parse_position(command: str) -> chess.Board:
