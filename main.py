@@ -36,7 +36,7 @@ def choose_move(board: chess.Board) -> chess.Move:
     best_move = None
     for move in board.legal_moves:
         board.push(move)
-        eval = minimax(board, 3)
+        eval = minimax(board, 4)
         board.pop()
 
         if best_move is None:
