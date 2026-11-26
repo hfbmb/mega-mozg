@@ -36,7 +36,7 @@ def choose_move(board: chess.Board) -> chess.Move:
     best_move = None
     for move in board.legal_moves:
         board.push(move)
-        eval = evaluate(board)
+        eval = minimax(board, 3)
         board.pop()
 
         if best_move is None:
@@ -52,6 +52,35 @@ def choose_move(board: chess.Board) -> chess.Move:
             best_move = move
 
     return best_move
+
+
+def minimax(board: chess.Board, depth: int) -> int:
+    result = board.outcome()
+    if result:
+        if result.winner is chess.WHITE:
+            return 9999999
+        elif result.winner is chess.BLACK:
+            return -9999999
+        else: return 0
+
+    if depth == 1:
+        return evaluate(board)
+    score = None
+    for move in board.legal_moves:
+        board.push(move)
+        eval = minimax(board, depth-1)
+        board.pop()
+
+        if score is None:
+            score = eval
+            continue
+
+        if board.turn and eval > score:
+            score = eval
+        elif not board.turn and eval < score:
+            score = eval
+
+    return score
 
 
 def evaluate(board: chess.Board) -> int:
