@@ -1,7 +1,5 @@
 import sys
 
-import random
-
 import chess
 
 
@@ -34,7 +32,35 @@ def uci() -> None:
 
 
 def choose_move(board: chess.Board) -> chess.Move:
-    return random.choice([move for move in board.legal_moves])
+    score = None
+    best_move = None
+    for move in board.legal_moves:
+        board.push(move)
+        eval = evaluate(board)
+        board.pop()
+
+        if best_move is None:
+            score = eval
+            best_move = move
+            continue
+
+        if board.turn and eval > score:
+            score = eval
+            best_move = move
+        elif not board.turn and eval < score:
+            score = eval
+            best_move = move
+
+    return best_move
+
+
+def evaluate(board: chess.Board) -> int:
+    piece_costs = {"K": 0, "Q": 9, "R": 5, "B": 3, "N": 3, "P": 1, "k": 0, "q": -9, "r": -5, "b": -3, "n": -3, "p": -1}
+    sum = 0
+    for s in chess.SQUARES:
+        piece = board.piece_at(s).symbol() if board.piece_at(s) else "k"
+        sum += piece_costs[piece]
+    return sum
 
 
 def parse_position(command: str) -> chess.Board:
