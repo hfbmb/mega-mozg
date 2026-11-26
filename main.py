@@ -13,8 +13,8 @@ def uci() -> None:
         command = line.strip()
 
         if command == "uci":
-            print("id name python-chess-starter")
-            print("id author your-name-here")
+            print("id name mega-mozg")
+            print("id author hfbmb")
             print("uciok")
         elif command == "isready":
             print("readyok")
